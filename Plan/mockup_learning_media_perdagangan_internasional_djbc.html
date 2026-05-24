@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="file:///C:/Users/ASUS/Documents/Learning%20media%202/materi/search-index.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -56,6 +57,10 @@
         }
         .tab-active { background: #0A2240; color: #fff; border-color: #0A2240; }
         .tap-target { min-width: 44px; min-height: 44px; }
+        .media-frame { width: 100%; height: 100%; border: 0; background: #fff; }
+        .pdf-stage { width: 100%; height: min(58vh, 560px); max-height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .pdf-page-frame { width: 100%; height: 100%; overflow: hidden; }
+        .object-fit-contain { object-fit: contain; }
     </style>
 </head>
 <body class="bg-slate-100 text-kemenkeu-charcoal min-h-screen selection:bg-kemenkeu-gold selection:text-kemenkeu-navy">
@@ -86,8 +91,8 @@
         <section id="view-diagnostic" class="main-view bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden"></section>
 
         <section id="view-learning" class="main-view hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start" id="main-grid-layout">
-                <div class="lg:col-span-4 transition-all duration-300" id="player-column-wrapper">
+            <div class="grid grid-cols-1 gap-4 items-start" id="main-grid-layout">
+                <div class="transition-all duration-300" id="player-column-wrapper">
                     <div id="player-wrapper" class="bg-slate-950 rounded-xl md:rounded-2xl shadow-xl border border-slate-800 overflow-hidden">
                         <div class="relative aspect-[16/9] slide-shell overflow-hidden text-white">
                             <div class="relative z-10 h-full flex flex-col p-3 md:p-5">
@@ -97,7 +102,7 @@
                                             <span class="w-8 h-8 rounded-lg bg-kemenkeu-gold text-kemenkeu-navy flex items-center justify-center font-black">K</span>
                                             <div class="min-w-0">
                                                 <p class="text-[10px] md:text-xs font-black tracking-widest uppercase text-kemenkeu-gold truncate">BPPK - DJBC Learning Module</p>
-                                                <p class="text-[10px] text-slate-300 truncate" id="active-source">Sumber: PDF Pengantar Perdagangan Internasional</p>
+                                                <p class="text-[10px] text-slate-300 truncate" id="active-source">Sumber: C:\Users\ASUS\Documents\Learning media 2\materi\knowledge</p>
                                             </div>
                                         </div>
                                     </div>
@@ -119,6 +124,9 @@
                             </div>
 
                             <div class="absolute right-3 bottom-16 md:bottom-20 z-30 flex flex-col gap-2">
+                                <button onclick="focusedResourceSearchMatch = null; toggleFloatingWindow('resource')" class="pulse-gold-btn tap-target rounded-full bg-kemenkeu-gold hover:bg-kemenkeu-goldHover text-kemenkeu-navy shadow-xl" title="Buka resource pembelajaran">
+                                    <i class="fa-solid fa-folder-open"></i>
+                                </button>
                                 <button onclick="toggleFloatingWindow('faq')" class="pulse-gold-btn tap-target rounded-full bg-kemenkeu-gold hover:bg-kemenkeu-goldHover text-kemenkeu-navy shadow-xl" title="Buka FAQ">
                                     <i class="fa-solid fa-circle-question"></i>
                                 </button>
@@ -142,7 +150,7 @@
                                 <header class="bg-kemenkeu-navy text-white px-3 py-2 flex justify-between items-center">
                                     <div>
                                         <span class="text-xs font-black block"><i class="fa-solid fa-robot text-kemenkeu-gold mr-1"></i> Srikandi AI Bot</span>
-                                        <span class="text-[9px] text-slate-300">Simulasi RAG berbasis dua PDF modul</span>
+                                        <span class="text-[9px] text-slate-300">Simulasi RAG berbasis knowledge dan resource</span>
                                     </div>
                                     <button onclick="closeFloatingWindow('chatbot')" class="tap-target !min-w-8 !min-h-8 text-slate-300 hover:text-white" aria-label="Tutup chatbot"><i class="fa-solid fa-xmark"></i></button>
                                 </header>
@@ -153,6 +161,29 @@
                                     <input id="chat-input" onkeypress="handleChatEnter(event)" class="flex-1 text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-kemenkeu-gold" placeholder="Tanya materi...">
                                     <button onclick="sendMessage()" class="tap-target !min-w-11 !min-h-10 rounded-lg bg-kemenkeu-navy text-white hover:bg-kemenkeu-navyLight" aria-label="Kirim"><i class="fa-solid fa-paper-plane"></i></button>
                                 </div>
+                            </aside>
+
+                            <aside id="window-resource" class="hidden absolute top-14 right-3 bottom-3 w-[19rem] md:w-96 bg-white/95 text-slate-800 rounded-xl shadow-2xl border border-slate-200 z-40 translate-x-[120%] transition-transform duration-300 flex flex-col overflow-hidden">
+                                <header class="bg-kemenkeu-navy text-white px-3 py-2 flex justify-between items-center">
+                                    <span class="text-xs font-black"><i class="fa-solid fa-folder-open text-kemenkeu-gold mr-1"></i> Resource Pembelajaran</span>
+                                    <button onclick="closeFloatingWindow('resource')" class="tap-target !min-w-8 !min-h-8 text-slate-300 hover:text-white" aria-label="Tutup resource"><i class="fa-solid fa-xmark"></i></button>
+                                </header>
+                                <div class="p-2 border-b bg-slate-50 flex items-center justify-between gap-2">
+                                    <p class="text-[11px] text-slate-500 font-bold leading-snug">File dari <span class="text-kemenkeu-navy">materi/resource</span></p>
+                                    <button onclick="refreshMaterials()" class="px-3 py-2 rounded-lg bg-white border border-slate-200 text-[11px] font-black text-kemenkeu-navy hover:border-kemenkeu-gold"><i class="fa-solid fa-rotate mr-1"></i> Refresh</button>
+                                </div>
+                                <div id="resource-list-container" class="divide-y divide-slate-100 overflow-y-auto flex-1 text-xs"></div>
+                            </aside>
+
+                            <aside id="window-search" class="hidden absolute top-14 right-3 bottom-3 w-[19rem] md:w-96 bg-white/95 text-slate-800 rounded-xl shadow-2xl border border-slate-200 z-40 translate-x-[120%] transition-transform duration-300 flex flex-col overflow-hidden">
+                                <header class="bg-kemenkeu-navy text-white px-3 py-2 flex justify-between items-center">
+                                    <div>
+                                        <span class="text-xs font-black block"><i class="fa-solid fa-magnifying-glass text-kemenkeu-gold mr-1"></i> Hasil Deep Text Search</span>
+                                        <span class="text-[9px] text-slate-300">Indeks knowledge dan resource</span>
+                                    </div>
+                                    <button onclick="clearSearch()" class="tap-target !min-w-8 !min-h-8 text-slate-300 hover:text-white" aria-label="Tutup pencarian"><i class="fa-solid fa-xmark"></i></button>
+                                </header>
+                                <div id="sidebar-results-container" class="divide-y divide-slate-100 overflow-y-auto flex-1 text-xs"></div>
                             </aside>
                         </div>
 
@@ -185,18 +216,13 @@
                                 </select>
                             </div>
                             <select id="slide-selector" onchange="jumpToSlide(this.value)" class="max-w-full md:max-w-xs bg-kemenkeu-navyLight text-white text-xs font-bold py-2 px-3 rounded-lg border border-slate-700 focus:outline-none"></select>
+                            <button id="module-download-btn" onclick="downloadActiveModule(event)" class="tap-target !min-w-10 !min-h-10 rounded-lg bg-kemenkeu-gold hover:bg-kemenkeu-goldHover text-kemenkeu-navy flex items-center justify-center" title="Download modul aktif" aria-label="Download modul aktif"><i class="fa-solid fa-download text-xs"></i></button>
+                            <button onclick="refreshMaterials()" class="tap-target !min-w-10 !min-h-10 rounded-lg bg-kemenkeu-navyLight border border-slate-700 hover:bg-[#1C3E69] text-white" title="Refresh daftar modul dan resource"><i class="fa-solid fa-rotate text-xs"></i></button>
                             <button onclick="toggleFullscreen()" id="btn-fullscreen" class="tap-target !min-w-10 !min-h-10 rounded-lg bg-kemenkeu-navyLight border border-slate-700 hover:bg-[#1C3E69] text-white" aria-label="Fullscreen"><i class="fa-solid fa-expand text-xs"></i></button>
                         </div>
                     </div>
                 </div>
 
-                <aside id="search-sidebar" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-[540px] flex-col">
-                    <header class="bg-kemenkeu-navy px-4 py-3 text-white flex items-center justify-between">
-                        <span class="text-xs font-black uppercase"><i class="fa-solid fa-list-check text-kemenkeu-gold mr-1"></i> Hasil Pencarian</span>
-                        <button onclick="clearSearch()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-                    </header>
-                    <div id="sidebar-results-container" class="divide-y divide-slate-100 overflow-y-auto flex-1 text-xs"></div>
-                </aside>
             </div>
             <div class="mt-4 flex justify-end">
                 <button id="learning-next-btn" onclick="switchView('assignment')" class="px-4 py-2 rounded-lg bg-kemenkeu-gold text-kemenkeu-navy text-sm font-black disabled:opacity-40 disabled:cursor-not-allowed">
@@ -212,7 +238,27 @@
     </main>
 
     <script>
-        const slides = [
+        const embeddedMaterialManifest = {
+            generatedAt: "2026-05-24T00:00:00+07:00",
+            basePath: "file:///C:/Users/ASUS/Documents/Learning%20media%202/materi",
+            knowledge: [
+                { name: "01 Hook.jpg", path: "file:///C:/Users/ASUS/Documents/Learning%20media%202/materi/knowledge/01%20Hook.jpg", type: "image", size: 228006 },
+                { name: "02 Kerangka-Dasar-Kepabeanan-Dari-Konsep-ke-Pengawasan-DJBC.pdf", path: "file:///C:/Users/ASUS/Documents/Learning%20media%202/materi/knowledge/02%20Kerangka-Dasar-Kepabeanan-Dari-Konsep-ke-Pengawasan-DJBC.pdf", type: "pdf", size: 3084998, pages: 10 },
+                { name: "03 Video Pembahasan Soal.mp4", path: "file:///C:/Users/ASUS/Documents/Learning%20media%202/materi/knowledge/03%20Video%20Pembahasan%20Soal.mp4", type: "video", size: 42196879 }
+            ],
+            resource: [
+                { name: "CTA.png", path: "file:///C:/Users/ASUS/Documents/Learning%20media%202/materi/resource/CTA.png", type: "image", size: 2162198 },
+                { name: "Pengantar-Konsep-Perdagangan-Internasional (2).pdf", path: "file:///C:/Users/ASUS/Documents/Learning%20media%202/materi/resource/Pengantar-Konsep-Perdagangan-Internasional%20(2).pdf", type: "pdf", size: 996563, pages: 10 }
+            ]
+        };
+        let materialManifest = normalizeMaterialManifest(embeddedMaterialManifest);
+        let slides = buildKnowledgeItems(materialManifest.knowledge);
+        let resourceFiles = sortMaterialFiles(materialManifest.resource);
+        let textSearchIndex = window.learningTextSearchIndex?.entries || [];
+        let activeModuleDownload = { path: slides[0]?.file?.path || '#', name: slides[0]?.file?.name || 'modul' };
+        let focusedResourceSearchMatch = null;
+
+        const legacySlides = [
             {
                 id: 1,
                 title: "Orientasi Modul",
@@ -354,12 +400,232 @@
         let postScore = null;
         let assignmentScore = null;
         let pendingAssignmentSubmission = null;
+        let assignmentDraft = '';
         let videoCompletionPercent = 0;
         let scormEvents = [{ event: "Initialize", value: "SCORM runtime mock initialized", time: new Date().toLocaleTimeString('id-ID') }];
         const quizState = {
             diagnostic: { current: 0, answers: [], submitted: false },
             posttest: { current: 0, answers: [], submitted: false }
         };
+        const SESSION_KEY = 'djbc-learning-media-session-v3';
+        let restoredActiveView = 'diagnostic';
+
+        function saveSessionState() {
+            try {
+                const activeView = document.querySelector('.main-view:not(.hidden)')?.id?.replace('view-', '') || restoredActiveView || 'diagnostic';
+                const editor = document.getElementById('assignment-editor');
+                if (editor) assignmentDraft = editor.innerHTML;
+                localStorage.setItem(SESSION_KEY, JSON.stringify({
+                    activeView,
+                    currentSlide,
+                    completedSlides,
+                    diagnosticScore,
+                    postScore,
+                    assignmentScore,
+                    pendingAssignmentSubmission,
+                    assignmentDraft,
+                    videoCompletionPercent,
+                    scormEvents,
+                    quizState,
+                    savedAt: new Date().toISOString()
+                }));
+            } catch (error) {
+                console.warn('Session tidak dapat disimpan', error);
+            }
+        }
+
+        function restoreSessionState() {
+            try {
+                const raw = localStorage.getItem(SESSION_KEY);
+                if (!raw) return;
+                const saved = JSON.parse(raw);
+                restoredActiveView = saved.activeView || 'diagnostic';
+                currentSlide = Number(saved.currentSlide || 1);
+                completedSlides = saved.completedSlides || { 1: true };
+                diagnosticScore = saved.diagnosticScore ?? null;
+                postScore = saved.postScore ?? null;
+                assignmentScore = saved.assignmentScore ?? null;
+                pendingAssignmentSubmission = saved.pendingAssignmentSubmission || null;
+                assignmentDraft = saved.assignmentDraft || '';
+                videoCompletionPercent = Number(saved.videoCompletionPercent || 0);
+                if (Array.isArray(saved.scormEvents)) scormEvents = saved.scormEvents;
+                if (saved.quizState?.diagnostic) Object.assign(quizState.diagnostic, saved.quizState.diagnostic);
+                if (saved.quizState?.posttest) Object.assign(quizState.posttest, saved.quizState.posttest);
+            } catch (error) {
+                console.warn('Session tidak dapat dipulihkan', error);
+            }
+        }
+
+        function sortMaterialFiles(files = []) {
+            return [...files].sort((a, b) => a.name.localeCompare(b.name, 'id', { numeric: true, sensitivity: 'base' }));
+        }
+
+        function normalizeMaterialManifest(manifest) {
+            const basePath = manifest?.basePath || 'file:///C:/Users/ASUS/Documents/Learning%20media%202/materi';
+            const normalize = (files, folder) => sortMaterialFiles((files || []).map(file => {
+                const extension = (file.name.split('.').pop() || '').toLowerCase();
+                return {
+                    ...file,
+                    type: file.type || getFileType(file.name),
+                    extension,
+                    path: file.path || encodeURI(`${basePath}/${folder}/${file.name}`).replace(/#/g, '%23'),
+                    kbScope: 'faq-rag'
+                };
+            }));
+            return {
+                generatedAt: manifest?.generatedAt || new Date().toISOString(),
+                basePath,
+                knowledge: normalize(manifest?.knowledge, 'knowledge'),
+                resource: normalize(manifest?.resource, 'resource')
+            };
+        }
+
+        function getFileType(name) {
+            const ext = (name.split('.').pop() || '').toLowerCase();
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return 'image';
+            if (['mp4', 'webm', 'mov', 'm4v'].includes(ext)) return 'video';
+            if (ext === 'pdf') return 'pdf';
+            if (['doc', 'docx'].includes(ext)) return 'document';
+            if (['ppt', 'pptx'].includes(ext)) return 'presentation';
+            if (['xls', 'xlsx', 'csv'].includes(ext)) return 'spreadsheet';
+            return 'file';
+        }
+
+        function getFileIcon(type) {
+            return {
+                pdf: 'fa-file-pdf',
+                'pdf-page': 'fa-file-pdf',
+                video: 'fa-file-video',
+                image: 'fa-file-image',
+                document: 'fa-file-word',
+                presentation: 'fa-file-powerpoint',
+                spreadsheet: 'fa-file-excel',
+                file: 'fa-file'
+            }[type] || 'fa-file';
+        }
+
+        function formatBytes(bytes) {
+            const size = Number(bytes || 0);
+            if (!size) return '-';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let value = size;
+            let unit = 0;
+            while (value >= 1024 && unit < units.length - 1) {
+                value /= 1024;
+                unit += 1;
+            }
+            return `${value.toFixed(value >= 10 || unit === 0 ? 0 : 1)} ${units[unit]}`;
+        }
+
+        function buildKnowledgeItems(files) {
+            const items = [];
+            sortMaterialFiles(files).forEach(file => {
+                if (file.type === 'pdf' && Number(file.pages || file.pageCount) > 0) {
+                    const totalPages = Number(file.pages || file.pageCount);
+                    Array.from({ length: totalPages }, (_, pageIndex) => {
+                        const pageNumber = pageIndex + 1;
+                        items.push({
+                            id: items.length + 1,
+                            type: 'pdf-page',
+                            title: `${file.name.replace(/\.[^/.]+$/, '')} - Halaman ${pageNumber}`,
+                            source: `${file.path}#page=${pageNumber}`,
+                            badge: 'PDF Modul',
+                            subtitle: `${file.name} - Halaman ${pageNumber} dari ${totalPages}`,
+                            body: `Halaman PDF ditampilkan terpisah agar navigasi modul dan progress belajar menghitung halaman yang benar-benar dilihat peserta.`,
+                            bullets: [`File PDF: ${file.name}`, `Halaman: ${pageNumber}/${totalPages}`, 'Masuk ke korpus FAQ dan knowledge base RAG chatbot.'],
+                            keywords: `${file.name} halaman ${pageNumber} pdf knowledge material modul pembelajaran FAQ RAG chatbot`,
+                            pageNumber,
+                            totalPages,
+                            file
+                        });
+                    });
+                    return;
+                }
+                items.push({
+                    id: items.length + 1,
+                    type: file.type,
+                    title: file.name.replace(/\.[^/.]+$/, ''),
+                    source: file.path,
+                    badge: file.type === 'video' ? 'Video Pembelajaran' : file.type === 'image' ? 'Gambar Modul' : 'Materi Modul',
+                    subtitle: file.name,
+                    body: `Ditampilkan sesuai tampilan asal file dari direktori C:\\Users\\ASUS\\Documents\\Learning media 2\\materi\\knowledge. File ini juga masuk daftar sumber untuk FAQ dan knowledge base RAG chatbot.`,
+                    bullets: [`Jenis file: ${file.type.toUpperCase()}`, `Ukuran: ${formatBytes(file.size)}`, 'Gunakan tombol download jika perlu membuka file di luar learning media.'],
+                    keywords: `${file.name} ${file.type} knowledge material modul pembelajaran FAQ RAG chatbot`,
+                    file
+                });
+            });
+            return items;
+        }
+
+        function buildSearchIndexFromMaterials() {
+            const moduleEntries = slides.map(item => ({
+                folder: 'knowledge',
+                fileName: item.file.name,
+                path: item.file.path,
+                type: item.file.type,
+                size: item.file.size,
+                page: item.pageNumber || null,
+                pages: item.totalPages || item.file.pages || null,
+                title: item.title,
+                text: `${item.file.name} ${item.title} ${item.body} ${item.bullets.join(' ')} ${item.keywords}`
+            }));
+            const resourceEntries = resourceFiles.map(file => ({
+                folder: 'resource',
+                fileName: file.name,
+                path: file.path,
+                type: file.type,
+                size: file.size,
+                page: file.page || null,
+                pages: file.pages || null,
+                title: file.name,
+                text: `${file.name} ${file.type} resource pembelajaran FAQ RAG knowledge base`
+            }));
+            return [...moduleEntries, ...resourceEntries];
+        }
+
+        async function refreshMaterials() {
+            await loadMaterialManifest(true);
+        }
+
+        async function loadMaterialManifest(force = false) {
+            try {
+                const manifestUrls = [
+                    `./materi/manifest.json${force ? `?t=${Date.now()}` : ''}`,
+                    `file:///C:/Users/ASUS/Documents/Learning%20media%202/materi/manifest.json${force ? `?t=${Date.now()}` : ''}`,
+                    `./materials/manifest.json${force ? `?t=${Date.now()}` : ''}`
+                ];
+                let loaded = null;
+                for (const url of manifestUrls) {
+                    try {
+                        const response = await fetch(url, { cache: 'no-store' });
+                        if (response.ok) {
+                            loaded = await response.json();
+                            break;
+                        }
+                    } catch (error) {
+                        loaded = null;
+                    }
+                }
+                if (!loaded) throw new Error('manifest unavailable');
+                materialManifest = normalizeMaterialManifest(loaded);
+            } catch (error) {
+                materialManifest = normalizeMaterialManifest(embeddedMaterialManifest);
+                if (force) pushScormEvent('Manifest', 'refresh=fallback-embedded-manifest');
+            }
+            slides = buildKnowledgeItems(materialManifest.knowledge);
+            resourceFiles = sortMaterialFiles(materialManifest.resource);
+            textSearchIndex = window.learningTextSearchIndex?.entries || buildSearchIndexFromMaterials();
+            if (!slides.length) {
+                slides = buildKnowledgeItems([{ name: 'Belum ada materi di materi/knowledge', path: '#', type: 'file', size: 0 }]);
+            }
+            if (!slides.find(item => item.id === currentSlide)) currentSlide = 1;
+            renderSlideSelector();
+            renderSlide();
+            renderResources();
+            renderFAQs();
+            renderAnalyticsView();
+            updateNavigationLocks();
+        }
 
         function escapeHtml(str) {
             return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
@@ -394,6 +660,7 @@
             if (name === 'feedback') renderFeedbackView();
             if (name === 'analytics') renderAnalyticsView();
             pushScormEvent("View", `active-tab=${name}`);
+            saveSessionState();
         }
 
         function canAccessTab(name) {
@@ -408,7 +675,8 @@
 
         function isModuleComplete() {
             const slideTotal = getSlideItems().length;
-            return Object.keys(completedSlides).length >= slideTotal && videoCompletionPercent >= 95;
+            const hasVideo = slides.some(item => item.type === 'video');
+            return Object.keys(completedSlides).length >= slideTotal && (!hasVideo || videoCompletionPercent >= 95);
         }
 
         function getSlideItems() {
@@ -418,14 +686,16 @@
         function calculateModuleCompletion() {
             const slideTotal = getSlideItems().length;
             const completedSlideUnits = Object.keys(completedSlides).length;
-            const videoUnit = Math.min(100, videoCompletionPercent) / 100;
-            return Math.round(((completedSlideUnits + videoUnit) / (slideTotal + 1)) * 100);
+            const hasVideo = slides.some(item => item.type === 'video');
+            const videoUnit = hasVideo ? Math.min(100, videoCompletionPercent) / 100 : 0;
+            const totalUnits = slideTotal + (hasVideo ? 1 : 0);
+            return totalUnits ? Math.round(((completedSlideUnits + videoUnit) / totalUnits) * 100) : 0;
         }
 
         function getModuleDropOffPoint() {
             const incompleteSlide = getSlideItems().find(item => !completedSlides[item.id]);
             if (incompleteSlide) return incompleteSlide.title;
-            if (videoCompletionPercent < 95) return `Video Pembahasan Soal (${videoCompletionPercent}% ditonton)`;
+            if (slides.some(item => item.type === 'video') && videoCompletionPercent < 95) return `Video pembelajaran (${videoCompletionPercent}% ditonton)`;
             return 'Tidak terdeteksi';
         }
 
@@ -471,76 +741,165 @@
 
         function renderSlide() {
             const data = slides.find(s => s.id === currentSlide);
+            if (!data) return;
             document.getElementById('active-source').textContent = `Sumber: ${data.source}`;
-            document.getElementById('slide-number').textContent = `${data.type === 'video' ? 'Video' : 'Slide'} ${currentSlide} / ${slides.length}`;
+            document.getElementById('slide-number').textContent = `${getMaterialKindLabel(data.type)} ${currentSlide} / ${slides.length}`;
             document.getElementById('slide-selector').value = currentSlide;
             document.getElementById('btn-prev').disabled = currentSlide === 1;
             document.getElementById('btn-next').disabled = currentSlide === slides.length;
+            updateModuleDownloadButton(data);
             if (data.type !== 'video') completedSlides[currentSlide] = true;
 
             if (data.type === 'video') {
                 document.getElementById('dynamic-slide-content-area').innerHTML = `
-                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-3 md:gap-5 items-center">
-                        <div class="lg:col-span-3 rounded-xl overflow-hidden border border-white/10 bg-black/50 shadow-2xl">
+                    <div class="grid grid-cols-1 gap-3 md:gap-4 items-center">
+                        <div class="rounded-xl overflow-hidden border border-white/10 bg-black/70 shadow-2xl">
                             <video id="integrated-learning-video" class="w-full aspect-video bg-black" preload="metadata" onloadedmetadata="syncVideoToolbar()" ontimeupdate="syncVideoToolbar()" onplay="onIntegratedVideoPlay()" onpause="onIntegratedVideoPause()" onended="onIntegratedVideoEnded()">
-                                <source src="${escapeHtml(data.videoSrc)}" type="video/mp4">
-                                Browser Anda belum dapat memutar video ini. Letakkan file video di folder Plan dengan nama video_pembelajaran.mp4 atau ubah atribut src pada elemen video.
+                                <source src="${escapeHtml(data.file.path)}" type="video/mp4">
+                                Browser Anda belum dapat memutar video ini.
                             </video>
                         </div>
-                        <div class="lg:col-span-2 space-y-3">
+                        <div class="hidden">
                             <span class="inline-flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest text-kemenkeu-gold">
-                                <i class="fa-solid fa-circle-play"></i> ${highlight(data.badge)}
+                                <i class="fa-solid ${getFileIcon(data.type)}"></i> ${highlight(data.badge)}
                             </span>
-                            <h2 class="text-2xl md:text-4xl font-black leading-tight">${highlight(data.subtitle)}</h2>
+                            <h2 class="text-xl md:text-2xl font-black leading-tight break-words">${highlight(data.subtitle)}</h2>
                             <p class="text-sm md:text-base text-slate-200 leading-relaxed">${highlight(data.body)}</p>
-                            <div class="grid gap-2">
-                                ${data.bullets.map((b, index) => `
-                                    <div class="rounded-xl border border-white/12 bg-white/10 p-3 backdrop-blur-sm">
-                                        <div class="flex gap-3">
-                                            <span class="shrink-0 w-8 h-8 rounded-lg bg-kemenkeu-gold text-kemenkeu-navy flex items-center justify-center text-xs font-black">${String(index + 1).padStart(2, '0')}</span>
-                                            <p class="text-xs md:text-sm text-slate-100 leading-relaxed">${highlight(b)}</p>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
+                            ${renderMaterialMeta(data)}
                         </div>
                     </div>
                 `;
                 updateProgress();
                 updateToolbarForContent(data);
                 syncVideoToolbar();
-                pushScormEvent("SetValue", `location=video-pembahasan-soal`);
+                pushScormEvent("SetValue", `location=${data.file.name}`);
                 updateNavigationLocks();
                 renderFeedbackView();
+                saveSessionState();
+                return;
+            }
+
+            if (data.type === 'pdf' || data.type === 'pdf-page') {
+                document.getElementById('dynamic-slide-content-area').innerHTML = `
+                    <div class="w-full h-full grid grid-cols-1 gap-3 items-center">
+                        <div class="pdf-stage rounded-xl overflow-hidden border border-white/10 bg-slate-100 shadow-2xl">
+                            <iframe class="media-frame pdf-page-frame" scrolling="no" src="${escapeHtml(`${data.file.path}#page=${data.pageNumber || 1}&toolbar=0&navpanes=0&scrollbar=0&pagemode=none&view=Fit&zoom=page-fit`)}" title="${escapeHtml(data.title)}"></iframe>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-300">
+                            <span class="font-black text-kemenkeu-gold"><i class="fa-solid fa-file-pdf mr-1"></i>${highlight(data.file.name)}</span>
+                            <span class="font-bold">${data.pageNumber ? `Halaman ${data.pageNumber}/${data.totalPages}` : ''}</span>
+                        </div>
+                    </div>
+                `;
+                updateProgress();
+                updateToolbarForContent(data);
+                pushScormEvent("SetValue", `location=${data.file.name}`);
+                updateNavigationLocks();
+                renderFeedbackView();
+                saveSessionState();
+                return;
+            }
+
+            if (data.type === 'image') {
+                document.getElementById('dynamic-slide-content-area').innerHTML = `
+                    <div class="w-full h-full grid grid-cols-1 gap-3 md:gap-4 items-center">
+                        <div class="rounded-xl overflow-hidden border border-white/10 bg-slate-950/60 shadow-2xl flex items-center justify-center">
+                            <img src="${escapeHtml(data.file.path)}" alt="${escapeHtml(data.title)}" class="max-h-[60vh] w-full object-fit-contain">
+                        </div>
+                        <div class="hidden">
+                            <span class="inline-flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest text-kemenkeu-gold">
+                                <i class="fa-solid ${getFileIcon(data.type)}"></i> ${highlight(data.badge)}
+                            </span>
+                            <h2 class="text-xl md:text-2xl font-black leading-tight break-words">${highlight(data.subtitle)}</h2>
+                            <p class="text-sm text-slate-200 leading-relaxed">${highlight(data.body)}</p>
+                            ${renderMaterialMeta(data)}
+                        </div>
+                    </div>
+                `;
+                updateProgress();
+                updateToolbarForContent(data);
+                pushScormEvent("SetValue", `location=${data.file.name}`);
+                updateNavigationLocks();
+                renderFeedbackView();
+                saveSessionState();
                 return;
             }
 
             document.getElementById('dynamic-slide-content-area').innerHTML = `
-                <div class="grid grid-cols-1 lg:grid-cols-5 gap-3 md:gap-5 items-center">
-                    <div class="lg:col-span-3 space-y-3">
-                        <span class="inline-flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest text-kemenkeu-gold">
-                            <i class="fa-solid fa-book-open-reader"></i> ${highlight(data.badge)}
-                        </span>
-                        <h2 class="text-2xl md:text-5xl font-black leading-tight max-w-4xl">${highlight(data.subtitle)}</h2>
-                        <p class="text-sm md:text-lg text-slate-200 leading-relaxed max-w-3xl">${highlight(data.body)}</p>
+                <div class="grid grid-cols-1 gap-3 md:gap-4 items-center">
+                    <div class="rounded-xl border border-white/10 bg-white/10 p-6 text-center">
+                        <i class="fa-solid ${getFileIcon(data.type)} text-6xl text-kemenkeu-gold"></i>
+                        <h2 class="mt-4 text-2xl font-black break-words">${highlight(data.subtitle)}</h2>
+                        <p class="mt-2 text-sm text-slate-200">Preview langsung belum tersedia untuk tipe file ini. Gunakan tombol download untuk membuka file asli.</p>
                     </div>
-                    <div class="lg:col-span-2 grid gap-2">
-                        ${data.bullets.map((b, index) => `
-                            <div class="rounded-xl border border-white/12 bg-white/10 p-3 md:p-4 backdrop-blur-sm">
-                                <div class="flex gap-3">
-                                    <span class="shrink-0 w-8 h-8 rounded-lg bg-kemenkeu-gold text-kemenkeu-navy flex items-center justify-center text-xs font-black">${String(index + 1).padStart(2, '0')}</span>
-                                    <p class="text-xs md:text-sm text-slate-100 leading-relaxed">${highlight(b)}</p>
-                                </div>
-                            </div>
-                        `).join('')}
+                    <div class="hidden">
+                        <span class="inline-flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-widest text-kemenkeu-gold">
+                            <i class="fa-solid ${getFileIcon(data.type)}"></i> ${highlight(data.badge)}
+                        </span>
+                        <p class="text-sm text-slate-200 leading-relaxed">${highlight(data.body)}</p>
+                        ${renderMaterialMeta(data)}
                     </div>
                 </div>
             `;
             updateProgress();
             updateToolbarForContent(data);
-            pushScormEvent("SetValue", `location=slide-${currentSlide}`);
+            pushScormEvent("SetValue", `location=${data.file.name}`);
             updateNavigationLocks();
             renderFeedbackView();
+            saveSessionState();
+        }
+
+        function renderSlideSelector() {
+            const selector = document.getElementById('slide-selector');
+            if (!selector) return;
+            selector.innerHTML = slides.map(s => `<option value="${s.id}">${getMaterialKindLabel(s.type)} ${s.id}: ${escapeHtml(s.title)}</option>`).join('');
+            selector.value = currentSlide;
+        }
+
+        function getMaterialKindLabel(type) {
+            return { pdf: 'PDF', 'pdf-page': 'PDF', video: 'Video', image: 'Gambar', document: 'Dokumen', presentation: 'Presentasi', spreadsheet: 'Spreadsheet', file: 'File' }[type] || 'File';
+        }
+
+        function updateModuleDownloadButton(data) {
+            const button = document.getElementById('module-download-btn');
+            if (!button || !data?.file?.path) return;
+            activeModuleDownload = { path: data.file.path, name: data.file.name || 'modul' };
+            button.title = `Download ${data.file.name || 'modul aktif'}`;
+            button.setAttribute('aria-label', `Download ${data.file.name || 'modul aktif'}`);
+        }
+
+        function downloadActiveModule(event) {
+            event?.preventDefault();
+            if (!activeModuleDownload?.path || activeModuleDownload.path === '#') return;
+            const link = document.createElement('a');
+            link.href = activeModuleDownload.path;
+            link.download = activeModuleDownload.name || 'modul';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            pushScormEvent('Download', `module=${activeModuleDownload.name || 'modul'}`);
+            saveSessionState();
+        }
+
+        function renderMaterialMeta(data) {
+            const pageInfo = data.type === 'pdf-page'
+                ? `<p class="mt-1 text-slate-300">Halaman ${data.pageNumber}/${data.totalPages}</p>`
+                : '';
+            return `
+                <div class="grid gap-2 text-xs">
+                    <div class="rounded-xl border border-white/12 bg-white/10 p-3 backdrop-blur-sm">
+                        <p class="font-black text-kemenkeu-gold">Knowledge source</p>
+                        <p class="mt-1 text-slate-100 break-words">Masuk ke korpus FAQ dan RAG chatbot.</p>
+                    </div>
+                    <div class="rounded-xl border border-white/12 bg-white/10 p-3 backdrop-blur-sm">
+                        <p class="font-black text-kemenkeu-gold">File</p>
+                        <p class="mt-1 text-slate-100 break-words">${escapeHtml(data.file.name)}</p>
+                        <p class="mt-1 text-slate-300">${escapeHtml(getMaterialKindLabel(data.type))} | ${formatBytes(data.file.size)}</p>
+                        ${pageInfo}
+                    </div>
+                </div>
+            `;
         }
 
         function updateProgress() {
@@ -613,7 +972,8 @@
 
         function onIntegratedVideoPlay() {
             document.getElementById('play-pause-icon').className = "fa-solid fa-pause text-xs";
-            pushScormEvent('Video', 'played=video-pembahasan-soal');
+            const data = slides.find(s => s.id === currentSlide);
+            pushScormEvent('Video', `played=${data?.file?.name || 'video'}`);
         }
 
         function onIntegratedVideoPause() {
@@ -624,8 +984,10 @@
             document.getElementById('play-pause-icon').className = "fa-solid fa-play text-xs";
             videoCompletionPercent = 100;
             updateProgress();
-            pushScormEvent('Video', 'completed=video-pembahasan-soal');
+            const data = slides.find(s => s.id === currentSlide);
+            pushScormEvent('Video', `completed=${data?.file?.name || 'video'}`);
             updateNavigationLocks();
+            saveSessionState();
         }
 
         function syncVideoToolbar() {
@@ -638,6 +1000,7 @@
                 videoCompletionPercent = Math.max(videoCompletionPercent, Math.round((video.currentTime / duration) * 100));
                 updateProgress();
                 updateNavigationLocks();
+                saveSessionState();
             }
             document.getElementById('video-current-time').textContent = formatVideoTime(video.currentTime || 0);
             document.getElementById('video-duration').textContent = formatVideoTime(duration);
@@ -708,71 +1071,70 @@
 
         function searchInsideContent() {
             const query = document.getElementById('slide-search').value.trim().toLowerCase();
-            const sidebar = document.getElementById('search-sidebar');
-            const player = document.getElementById('player-column-wrapper');
+            const sidebar = document.getElementById('window-search');
             const results = document.getElementById('sidebar-results-container');
             document.getElementById('clear-search-btn').classList.toggle('hidden', !query);
 
             if (!query) {
-                sidebar.classList.add('hidden');
-                sidebar.classList.remove('flex');
-                player.className = "lg:col-span-4 transition-all duration-300";
+                closeFloatingWindow('search');
                 renderSlide();
                 return;
             }
 
-            sidebar.classList.remove('hidden');
-            sidebar.classList.add('flex');
-            player.className = "lg:col-span-3 transition-all duration-300";
+            closeFloatingWindow('faq');
+            closeFloatingWindow('chatbot');
+            closeFloatingWindow('resource');
             const matches = buildDeepSearchResults(query);
+            sidebar.classList.remove('hidden');
+            setTimeout(() => sidebar.style.transform = 'translateX(0)', 10);
             results.innerHTML = matches.length ? `
                 <div class="px-3 py-2 bg-slate-50 border-b border-slate-100 text-[11px] font-black text-slate-500 uppercase tracking-wider">
                     ${matches.length} lokasi ditemukan
                 </div>
-                ${matches.map(match => `
-                    <button onclick="goToSearchResult(${match.slideId})" class="w-full text-left p-3 hover:bg-slate-50">
+                ${matches.map((match, index) => `
+                    <button onclick="goToSearchResult(${index})" class="w-full text-left p-3 hover:bg-slate-50">
                         <div class="flex justify-between gap-2 items-start">
-                            <div class="font-black text-kemenkeu-navy">${escapeHtml(match.slideTitle)}</div>
-                            <span class="text-[10px] text-slate-500 whitespace-nowrap">${match.kind} ${match.slideId}</span>
+                            <div class="font-black text-kemenkeu-navy leading-snug">${escapeHtml(match.title)}</div>
+                            <span class="text-[10px] text-slate-500 whitespace-nowrap">${escapeHtml(match.locationLabel)}</span>
                         </div>
-                        <p class="mt-1 text-[10px] font-black uppercase tracking-wider text-amber-700">${escapeHtml(match.location)}</p>
+                        <p class="mt-1 text-[10px] font-black uppercase tracking-wider text-amber-700">${escapeHtml(match.fileName)}</p>
                         <p class="mt-1 text-slate-600 leading-relaxed">${markQuery(match.snippet, query)}</p>
-                        <p class="mt-2 text-[10px] font-bold text-slate-400">${escapeHtml(match.source)}</p>
+                        <p class="mt-2 text-[10px] font-bold text-slate-400">${escapeHtml(match.folder === 'knowledge' ? 'Modul pembelajaran' : 'Resource pembelajaran')}</p>
                     </button>
                 `).join('')}
-            ` : `<div class="p-6 text-center text-slate-400">Tidak ada hasil pada seluruh materi pembelajaran.</div>`;
+            ` : `<div class="p-6 text-center text-slate-400">Tidak ada hasil pada indeks teks materi.</div>`;
+            window.currentSearchMatches = matches;
             renderSlide();
             pushScormEvent("Interaction", `search=${query.slice(0, 30)}`);
+            saveSessionState();
         }
 
         function buildDeepSearchResults(query) {
-            const locations = [];
-            slides.forEach(slide => {
-                const fields = [
-                    { label: "Judul slide", text: slide.title },
-                    { label: "Subjudul", text: slide.subtitle },
-                    { label: "Isi utama", text: slide.body },
-                    ...slide.bullets.map((text, index) => ({ label: `Poin materi ${index + 1}`, text })),
-                    { label: "Kata kunci", text: slide.keywords },
-                    { label: "Rujukan sumber", text: slide.source }
-                ];
-                fields.forEach(field => {
-                    const haystack = field.text.toLowerCase();
-                    let index = haystack.indexOf(query);
-                    while (index !== -1) {
-                        locations.push({
-                            slideId: slide.id,
-                            slideTitle: slide.title,
-                            kind: slide.type === 'video' ? 'Video' : 'Slide',
-                            source: slide.source,
-                            location: field.label,
-                            snippet: makeSnippet(field.text, index, query.length)
-                        });
-                        index = haystack.indexOf(query, index + query.length);
-                    }
-                });
+            const source = textSearchIndex.length ? textSearchIndex : buildSearchIndexFromMaterials();
+            return source.flatMap(entry => {
+                const haystack = `${entry.title || ''} ${entry.fileName || ''} ${entry.text || ''}`.toLowerCase();
+                const firstIndex = haystack.indexOf(query);
+                if (firstIndex === -1) return [];
+                return [{
+                    ...entry,
+                    title: entry.title || entry.fileName,
+                    snippet: makeSnippet(entry.text || entry.fileName || '', Math.max(0, (entry.text || '').toLowerCase().indexOf(query)), query.length),
+                    locationLabel: entry.page ? `Hal. ${entry.page}/${entry.pages || '-'}` : getMaterialKindLabel(entry.type),
+                    slideId: resolveSearchSlideId(entry)
+                }];
+            }).slice(0, 40);
+        }
+
+        function resolveSearchSlideId(entry) {
+            if (entry.folder !== 'knowledge') return null;
+            const normalizeName = value => String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+            const fileName = normalizeName(entry.fileName);
+            const match = slides.find(item => {
+                const sameFile = normalizeName(item.file?.name) === fileName;
+                const samePage = entry.page ? Number(item.pageNumber || 1) === Number(entry.page) : true;
+                return sameFile && samePage;
             });
-            return locations;
+            return match?.id || null;
         }
 
         function makeSnippet(text, index, length) {
@@ -783,13 +1145,33 @@
 
         function markQuery(text, query) {
             const safe = escapeHtml(text);
+            if (!query) return safe;
             const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
             return safe.replace(re, '<mark>$1</mark>');
         }
 
-        function goToSearchResult(slideId) {
-            currentSlide = Number(slideId);
-            renderSlide();
+        function goToSearchResult(index) {
+            const match = window.currentSearchMatches?.[index];
+            if (!match) return;
+            if (match.slideId) {
+                if (canAccessTab('learning')) {
+                    switchView('learning');
+                }
+                currentSlide = Number(match.slideId);
+                renderSlide();
+                closeFloatingWindow('search');
+                const wrapper = document.getElementById('player-wrapper');
+                wrapper.classList.add('ring-4', 'ring-kemenkeu-gold');
+                setTimeout(() => wrapper.classList.remove('ring-4', 'ring-kemenkeu-gold'), 1100);
+                pushScormEvent("Navigation", `search-hit=${match.fileName}${match.page ? `#page=${match.page}` : ''}`);
+            } else {
+                focusedResourceSearchMatch = match;
+                renderResources();
+                closeFloatingWindow('search');
+                toggleFloatingWindow('resource');
+                pushScormEvent("Navigation", `resource-hit=${match.fileName}${match.page ? `#page=${match.page}` : ''}`);
+            }
+            saveSessionState();
         }
 
         function clearSearch() {
@@ -797,12 +1179,62 @@
             searchInsideContent();
         }
 
+        function toggleResourceSidebar(forceOpen) {
+            if (forceOpen === false) closeFloatingWindow('resource');
+            else toggleFloatingWindow('resource');
+        }
+
+        function renderResources(focusedMatch = focusedResourceSearchMatch) {
+            const container = document.getElementById('resource-list-container');
+            if (!container) return;
+            const focusHtml = focusedMatch ? `
+                <div class="p-3 bg-amber-50 border-b border-amber-200">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-amber-700">Lokasi hasil pencarian</p>
+                    <p class="mt-1 font-black text-kemenkeu-navy leading-snug">${escapeHtml(focusedMatch.title || focusedMatch.fileName)}</p>
+                    <p class="mt-1 text-xs text-slate-600">${escapeHtml(focusedMatch.locationLabel || getMaterialKindLabel(focusedMatch.type))} pada ${escapeHtml(focusedMatch.fileName)}</p>
+                    <p class="mt-2 text-xs text-slate-600 leading-relaxed">${markQuery(focusedMatch.snippet || focusedMatch.text || focusedMatch.fileName, document.getElementById('slide-search')?.value.trim().toLowerCase() || '')}</p>
+                    <a href="${escapeHtml(`${focusedMatch.filePath || '#'}${focusedMatch.page ? `#page=${focusedMatch.page}` : ''}`)}" target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-1 rounded-lg bg-kemenkeu-navy px-3 py-2 text-[11px] font-black text-white hover:bg-kemenkeu-navyLight">
+                        <i class="fa-solid fa-location-dot"></i> Buka lokasi resource
+                    </a>
+                </div>
+            ` : '';
+            container.innerHTML = focusHtml + (resourceFiles.length ? resourceFiles.map(file => `
+                <article class="p-3 hover:bg-slate-50">
+                    <div class="flex items-start gap-3">
+                        <span class="w-10 h-10 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                            <i class="fa-solid ${getFileIcon(file.type)}"></i>
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="font-black text-kemenkeu-navy leading-snug break-words">${escapeHtml(file.name)}</p>
+                            <p class="mt-1 text-[11px] text-slate-500">${escapeHtml(getMaterialKindLabel(file.type))} | ${formatBytes(file.size)}</p>
+                            <p class="mt-1 text-[10px] text-slate-400 break-words">Sumber FAQ/RAG: ${escapeHtml(file.path)}</p>
+                            <a href="${escapeHtml(file.path)}" download class="mt-2 inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] font-black text-kemenkeu-navy hover:border-kemenkeu-gold">
+                                <i class="fa-solid fa-download"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            `).join('') : `<div class="p-6 text-center text-slate-400">Belum ada resource di materi/resource.</div>`);
+        }
+
         function toggleFloatingWindow(type) {
             const target = document.getElementById(`window-${type}`);
-            const other = document.getElementById(type === 'faq' ? 'window-chatbot' : 'window-faq');
-            other.classList.add('hidden');
-            other.style.transform = 'translateX(120%)';
+            if (!target) return;
+            if (type !== 'search') {
+                document.getElementById('slide-search').value = '';
+                document.getElementById('clear-search-btn').classList.add('hidden');
+            }
+
+            ['faq', 'chatbot', 'resource', 'search'].forEach(name => {
+                if (name === type) return;
+                const panel = document.getElementById(`window-${name}`);
+                if (!panel) return;
+                panel.style.transform = 'translateX(120%)';
+                panel.classList.add('hidden');
+            });
+
             if (target.classList.contains('hidden')) {
+                if (type === 'resource') renderResources();
                 target.classList.remove('hidden');
                 setTimeout(() => target.style.transform = 'translateX(0)', 10);
             } else {
@@ -812,13 +1244,14 @@
 
         function closeFloatingWindow(type) {
             const target = document.getElementById(`window-${type}`);
+            if (!target) return;
             target.style.transform = 'translateX(120%)';
             setTimeout(() => target.classList.add('hidden'), 300);
         }
 
         function renderFAQs() {
             const query = (document.getElementById('faq-search')?.value || '').toLowerCase();
-            const filtered = faqs.filter(f => `${f.q} ${f.a} ${f.ref} ${f.tag}`.toLowerCase().includes(query));
+            const filtered = getFaqItems().filter(f => `${f.q} ${f.a} ${f.ref} ${f.tag}`.toLowerCase().includes(query));
             document.getElementById('faq-list-container').innerHTML = filtered.map((f, i) => `
                 <details class="bg-white border border-slate-200 rounded-lg overflow-hidden" ${i === 0 && !query ? 'open' : ''}>
                     <summary class="cursor-pointer p-3 font-black text-kemenkeu-navy">${escapeHtml(f.q)} <span class="ml-1 text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">${escapeHtml(f.tag)}</span></summary>
@@ -830,6 +1263,20 @@
             `).join('') || `<div class="p-5 text-center text-slate-400">FAQ tidak ditemukan.</div>`;
         }
 
+        function getFaqItems() {
+            const sourceFaqs = [...slides, ...resourceFiles].map(fileOrItem => {
+                const file = fileOrItem.file || fileOrItem;
+                const folder = fileOrItem.file ? 'knowledge' : 'resource';
+                return {
+                    q: `Apakah file ${file.name} digunakan sebagai sumber knowledge base?`,
+                    a: `Ya. File dari materi/${folder} ini ditandai sebagai sumber penyusunan FAQ dan knowledge base RAG untuk chatbot. Backend perlu mengekstrak konten file ini sebelum indexing.`,
+                    ref: file.path,
+                    tag: folder === 'knowledge' ? 'Knowledge' : 'Resource'
+                };
+            });
+            return [...faqs, ...sourceFaqs];
+        }
+
         function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
@@ -837,7 +1284,11 @@
             const box = document.getElementById('chat-messages');
             box.insertAdjacentHTML('beforeend', `<div class="bg-kemenkeu-gold/25 border border-kemenkeu-gold/40 text-kemenkeu-navy font-bold p-3 rounded-lg ml-8 text-right">${escapeHtml(text)}</div>`);
             input.value = '';
-            const corpus = [...faqs, ...slides.map(s => ({ q: s.title, a: `${s.body} ${s.bullets.join(' ')}`, ref: s.source, tag: s.badge }))];
+            const corpus = [
+                ...getFaqItems(),
+                ...slides.map(s => ({ q: s.title, a: `${s.file.name} ${s.body} ${s.bullets.join(' ')} ${s.keywords}`, ref: s.source, tag: s.badge })),
+                ...resourceFiles.map(file => ({ q: file.name, a: `${file.name} ${file.type} resource pembelajaran FAQ RAG knowledge base`, ref: file.path, tag: 'Resource' }))
+            ];
             const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 3);
             const best = corpus
                 .map(item => ({ item, score: words.reduce((sum, w) => sum + (`${item.q} ${item.a} ${item.ref}`.toLowerCase().includes(w) ? 1 : 0), 0) }))
@@ -850,6 +1301,7 @@
                 box.scrollTop = box.scrollHeight;
             }, 450);
             pushScormEvent("Interaction", `chatbot-query=${text.slice(0, 24)}`);
+            saveSessionState();
             box.scrollTop = box.scrollHeight;
         }
 
@@ -922,11 +1374,27 @@
             `;
         }
 
+        function switchPanelTab(group, tabId) {
+            document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(button => {
+                const active = button.dataset.tabTarget === tabId;
+                button.classList.toggle('bg-kemenkeu-navy', active);
+                button.classList.toggle('text-white', active);
+                button.classList.toggle('bg-white', !active);
+                button.classList.toggle('text-slate-700', !active);
+                button.classList.toggle('border-kemenkeu-navy', active);
+                button.classList.toggle('border-slate-200', !active);
+            });
+            document.querySelectorAll(`[data-tab-panel="${group}"]`).forEach(panel => {
+                panel.classList.toggle('hidden', panel.id !== tabId);
+            });
+        }
+
         function selectQuizAnswer(type, selected) {
             const questions = type === 'diagnostic' ? diagnosticQuestions : postQuestions;
             const state = quizState[type];
             state.answers[state.current] = selected;
             renderQuestionView(type === 'diagnostic' ? 'view-diagnostic' : 'view-posttest', type === 'diagnostic' ? 'Diagnostik Test' : 'Post Test', type === 'diagnostic' ? 'Lima soal awal untuk memetakan pemahaman peserta sebelum masuk modul pembelajaran.' : 'Sepuluh soal akhir dengan blueprint yang selaras untuk mengukur capaian setelah pembelajaran.', questions, type);
+            saveSessionState();
         }
 
         function moveQuiz(type, step) {
@@ -934,6 +1402,7 @@
             const state = quizState[type];
             state.current = Math.max(0, Math.min(questions.length - 1, state.current + step));
             renderQuestionView(type === 'diagnostic' ? 'view-diagnostic' : 'view-posttest', type === 'diagnostic' ? 'Diagnostik Test' : 'Post Test', type === 'diagnostic' ? 'Lima soal awal untuk memetakan pemahaman peserta sebelum masuk modul pembelajaran.' : 'Sepuluh soal akhir dengan blueprint yang selaras untuk mengukur capaian setelah pembelajaran.', questions, type);
+            saveSessionState();
         }
 
         function submitQuiz(type) {
@@ -949,6 +1418,7 @@
                 updateNavigationLocks();
                 renderAnalyticsView();
                 renderFeedbackView();
+                saveSessionState();
             }
 
         function getQuizScore(type, questions) {
@@ -971,18 +1441,54 @@
                 const suggestions = wrong.length ? wrong.map(item => item.q) : questions.slice(0, 3);
                 return `
                     <div class="rounded-lg border border-slate-200 bg-white p-4 md:p-5">
-                        <p class="text-[11px] uppercase font-black tracking-widest text-slate-500">Feedback Diagnostik</p>
-                        <h3 class="mt-2 text-2xl font-black text-kemenkeu-navy">Skor ${result.score}</h3>
-                        <p class="mt-2 text-sm text-slate-600">Anda menjawab benar ${result.correct} dari ${result.total} soal. Hasil ini dipakai untuk merekomendasikan fokus belajar sebelum masuk modul pembelajaran.</p>
-                        <div class="max-h-[420px] overflow-y-auto mt-4">${renderAnswerReview(type, questions)}</div>
-                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                            ${suggestions.map(q => `
-                                <div class="rounded-lg bg-amber-50 border border-amber-200 p-3">
-                                    <p class="text-xs font-black text-amber-800">${escapeHtml(q.comp)}</p>
-                                    <p class="mt-1 text-sm font-bold text-slate-800">${escapeHtml(q.topic)}</p>
-                                    <p class="mt-1 text-xs text-slate-600">Saran belajar: pelajari ${escapeHtml(q.ref)} dan catat definisi kunci serta contoh penerapannya.</p>
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                                <p class="text-[11px] uppercase font-black tracking-widest text-slate-500">Feedback Diagnostik</p>
+                                <h3 class="mt-2 text-2xl font-black text-kemenkeu-navy">Skor ${result.score}</h3>
+                                <p class="mt-2 text-sm text-slate-600 max-w-3xl">Anda menjawab benar ${result.correct} dari ${result.total} soal. Gunakan tab di bawah untuk melihat ringkasan, review jawaban, dan saran topik.</p>
+                            </div>
+                            <span class="px-3 py-2 rounded-lg bg-kemenkeu-gold/20 text-kemenkeu-navy text-sm font-black">${result.correct}/${result.total} benar</span>
+                        </div>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <button data-tab-group="diagnostic-feedback" data-tab-target="diag-summary" onclick="switchPanelTab('diagnostic-feedback','diag-summary')" class="px-3 py-2 rounded-lg border border-kemenkeu-navy bg-kemenkeu-navy text-white text-xs font-black">Ringkasan</button>
+                            <button data-tab-group="diagnostic-feedback" data-tab-target="diag-review" onclick="switchPanelTab('diagnostic-feedback','diag-review')" class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-black">Review Jawaban</button>
+                            <button data-tab-group="diagnostic-feedback" data-tab-target="diag-suggestion" onclick="switchPanelTab('diagnostic-feedback','diag-suggestion')" class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-black">Saran Topik</button>
+                        </div>
+                        <div class="mt-4 min-h-[360px] max-h-[430px] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3">
+                            <section id="diag-summary" data-tab-panel="diagnostic-feedback">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div class="rounded-lg bg-white border border-slate-200 p-4">
+                                        <p class="text-[11px] font-black uppercase text-slate-500">Capaian Awal</p>
+                                        <p class="mt-2 text-3xl font-black text-kemenkeu-navy">${result.score}</p>
+                                        <p class="mt-1 text-xs text-slate-500">Baseline kesiapan peserta.</p>
+                                    </div>
+                                    <div class="rounded-lg bg-white border border-slate-200 p-4">
+                                        <p class="text-[11px] font-black uppercase text-slate-500">Topik Kuat</p>
+                                        <p class="mt-2 text-lg font-black text-emerald-700">${correct.length || 0}</p>
+                                        <p class="mt-1 text-xs text-slate-500">${correct.length ? [...new Set(correct.map(item => item.q.comp))].map(escapeHtml).join(', ') : 'Belum teridentifikasi.'}</p>
+                                    </div>
+                                    <div class="rounded-lg bg-white border border-slate-200 p-4">
+                                        <p class="text-[11px] font-black uppercase text-slate-500">Prioritas Belajar</p>
+                                        <p class="mt-2 text-lg font-black text-amber-700">${suggestions.length} topik</p>
+                                        <p class="mt-1 text-xs text-slate-500">Fokuskan eksplorasi modul pada daftar saran.</p>
+                                    </div>
                                 </div>
-                            `).join('')}
+                                <div class="mt-3 rounded-lg bg-white border border-slate-200 p-4 text-sm text-slate-700">
+                                    <strong>Interpretasi:</strong> ${wrong.length ? 'Peserta perlu membaca modul secara berurutan dan menggunakan fitur pencarian untuk istilah yang belum kuat.' : 'Peserta memiliki baseline yang baik; tetap ikuti modul untuk memperkuat konteks dan transfer ke assignment.'}
+                                </div>
+                            </section>
+                            <section id="diag-review" data-tab-panel="diagnostic-feedback" class="hidden">${renderAnswerReview(type, questions)}</section>
+                            <section id="diag-suggestion" data-tab-panel="diagnostic-feedback" class="hidden">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    ${suggestions.map(q => `
+                                        <div class="rounded-lg bg-white border border-amber-200 p-3">
+                                            <p class="text-xs font-black text-amber-800">${escapeHtml(q.comp)}</p>
+                                            <p class="mt-1 text-sm font-bold text-slate-800">${escapeHtml(q.topic)}</p>
+                                            <p class="mt-1 text-xs text-slate-600">Saran belajar: pelajari ${escapeHtml(q.ref)} dan catat definisi kunci serta contoh penerapannya.</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </section>
                         </div>
                         <div class="mt-5 flex justify-end">
                             <button onclick="switchView('learning')" class="px-4 py-2 rounded-lg bg-kemenkeu-gold text-kemenkeu-navy text-sm font-black">
@@ -1079,82 +1585,101 @@
             updateNavigationLocks();
             renderAnalyticsView();
             renderFeedbackView();
+            saveSessionState();
         }
 
         function renderAssignmentView() {
+            if (assignmentScore !== null) {
+                renderAssignmentFeedbackView();
+                return;
+            }
             document.getElementById('view-assignment').innerHTML = `
                 <div class="bg-kemenkeu-navy text-white p-4 md:p-5">
                     <h2 class="text-lg md:text-2xl font-black">Assignment dan Rubrik</h2>
                     <p class="mt-1 text-sm text-slate-300 max-w-4xl">Satu tugas performa berbasis studi kasus untuk menguji transfer konsep perdagangan internasional ke proses kepabeanan.</p>
                 </div>
-                <div class="p-4 md:p-5 space-y-4">
-                    <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
-                        <p class="text-[11px] font-black uppercase tracking-widest text-slate-500">Soal Assignment</p>
-                        <h3 class="mt-2 text-lg font-black text-kemenkeu-navy">Studi Kasus Importasi Komponen Elektronik</h3>
-                        <p class="mt-3 text-sm text-slate-700 leading-relaxed">Sebuah perusahaan mengimpor komponen elektronik untuk kebutuhan produksi dalam negeri. Barang tiba di kawasan pabean dan ditempatkan sementara sebelum kewajiban pabean diselesaikan. Buat memo analisis yang menjelaskan alur kewajiban pabean, risiko kepatuhan, serta rekomendasi agar DJBC tetap dapat memfasilitasi perdagangan sah tanpa melemahkan pengawasan.</p>
-                        <div class="mt-4 space-y-2 text-sm">
-                            <div class="bg-white border rounded-lg p-3"><strong>Output:</strong> memo 800-1.000 kata atau infografik proses.</div>
-                            <div class="bg-white border rounded-lg p-3"><strong>Wajib memuat:</strong> ekspor-impor, daerah/kawasan pabean, TPS, pemberitahuan pabean, fungsi DJBC, dan manajemen risiko.</div>
-                            <div class="bg-white border rounded-lg p-3"><strong>Catatan:</strong> hasil penilaian AI adalah rekomendasi awal dan tetap dapat ditinjau instruktur.</div>
-                        </div>
-                    </article>
-                    <article class="space-y-4">
-                        <div class="border border-slate-200 rounded-lg overflow-hidden">
-                            <div class="bg-slate-50 border-b border-slate-200 p-3 flex flex-wrap items-center gap-2">
-                                <button onclick="formatAssignment('bold')" class="w-9 h-9 rounded-lg border bg-white text-kemenkeu-navy font-black" title="Bold"><i class="fa-solid fa-bold"></i></button>
-                                <button onclick="formatAssignment('italic')" class="w-9 h-9 rounded-lg border bg-white text-kemenkeu-navy font-black" title="Italic"><i class="fa-solid fa-italic"></i></button>
-                                <button onclick="formatAssignment('insertUnorderedList')" class="w-9 h-9 rounded-lg border bg-white text-kemenkeu-navy font-black" title="Bullet list"><i class="fa-solid fa-list-ul"></i></button>
-                                <span class="text-xs text-slate-500 font-bold ml-1">Editor HTML jawaban essay</span>
+                <div class="p-4 md:p-5">
+                    <div class="flex flex-wrap gap-2">
+                        <button data-tab-group="assignment-work" data-tab-target="assignment-task-tab" onclick="switchPanelTab('assignment-work','assignment-task-tab')" class="px-3 py-2 rounded-lg border border-kemenkeu-navy bg-kemenkeu-navy text-white text-xs font-black">Soal</button>
+                        <button data-tab-group="assignment-work" data-tab-target="assignment-answer-tab" onclick="switchPanelTab('assignment-work','assignment-answer-tab')" class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-black">Jawaban dan Upload</button>
+                        <button data-tab-group="assignment-work" data-tab-target="assignment-rubric-tab" onclick="switchPanelTab('assignment-work','assignment-rubric-tab')" class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-black">Rubrik</button>
+                    </div>
+                    <div class="mt-4 min-h-[440px] max-h-[560px] overflow-y-auto rounded-lg border border-slate-200 bg-white p-4">
+                        <section id="assignment-task-tab" data-tab-panel="assignment-work">
+                            <article class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                                <p class="text-[11px] font-black uppercase tracking-widest text-slate-500">Soal Assignment</p>
+                                <h3 class="mt-2 text-lg font-black text-kemenkeu-navy">Studi Kasus Importasi Komponen Elektronik</h3>
+                                <p class="mt-3 text-sm text-slate-700 leading-relaxed">Sebuah perusahaan mengimpor komponen elektronik untuk kebutuhan produksi dalam negeri. Barang tiba di kawasan pabean dan ditempatkan sementara sebelum kewajiban pabean diselesaikan. Buat memo analisis yang menjelaskan alur kewajiban pabean, risiko kepatuhan, serta rekomendasi agar DJBC tetap dapat memfasilitasi perdagangan sah tanpa melemahkan pengawasan.</p>
+                                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                                    <div class="bg-white border rounded-lg p-3"><strong>Output:</strong><br>memo 800-1.000 kata atau infografik proses.</div>
+                                    <div class="bg-white border rounded-lg p-3"><strong>Wajib memuat:</strong><br>ekspor-impor, daerah/kawasan pabean, TPS, pemberitahuan pabean, fungsi DJBC, dan manajemen risiko.</div>
+                                    <div class="bg-white border rounded-lg p-3"><strong>Catatan:</strong><br>hasil penilaian AI adalah rekomendasi awal dan tetap dapat ditinjau instruktur.</div>
+                                </div>
+                            </article>
+                            <div class="mt-4 flex justify-end">
+                                <button onclick="switchPanelTab('assignment-work','assignment-answer-tab')" class="px-4 py-2 rounded-lg bg-kemenkeu-gold text-kemenkeu-navy text-sm font-black">Mulai Jawaban <i class="fa-solid fa-arrow-right ml-1"></i></button>
                             </div>
-                            <div id="assignment-editor" contenteditable="true" class="min-h-[260px] p-4 text-sm leading-relaxed focus:outline-none" aria-label="Editor jawaban assignment">
-                                <p>Tulis analisis Anda di sini...</p>
+                        </section>
+                        <section id="assignment-answer-tab" data-tab-panel="assignment-work" class="hidden">
+                            <div class="border border-slate-200 rounded-lg overflow-hidden">
+                                <div class="bg-slate-50 border-b border-slate-200 p-3 flex flex-wrap items-center gap-2">
+                                    <button onclick="formatAssignment('bold')" class="w-9 h-9 rounded-lg border bg-white text-kemenkeu-navy font-black" title="Bold"><i class="fa-solid fa-bold"></i></button>
+                                    <button onclick="formatAssignment('italic')" class="w-9 h-9 rounded-lg border bg-white text-kemenkeu-navy font-black" title="Italic"><i class="fa-solid fa-italic"></i></button>
+                                    <button onclick="formatAssignment('insertUnorderedList')" class="w-9 h-9 rounded-lg border bg-white text-kemenkeu-navy font-black" title="Bullet list"><i class="fa-solid fa-list-ul"></i></button>
+                                    <span class="text-xs text-slate-500 font-bold ml-1">Editor HTML jawaban essay</span>
+                                </div>
+                                <div id="assignment-editor" contenteditable="true" class="min-h-[240px] p-4 text-sm leading-relaxed focus:outline-none" aria-label="Editor jawaban assignment">
+                                    ${assignmentDraft || '<p>Tulis analisis Anda di sini...</p>'}
+                                </div>
                             </div>
-                        </div>
-                        <div class="space-y-3">
-                            <label class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 cursor-pointer hover:border-kemenkeu-gold">
-                                <span class="block text-sm font-black text-kemenkeu-navy"><i class="fa-solid fa-file-arrow-up mr-1"></i> Browse dan Upload File</span>
-                                <span class="block text-xs text-slate-500 mt-1">PDF, DOCX, PPTX, XLSX, atau gambar pendukung.</span>
-                                <input id="assignment-file" type="file" class="hidden" onchange="showSelectedFile()">
-                                <span id="selected-file-name" class="block mt-2 text-xs font-bold text-amber-700">Belum ada file dipilih.</span>
-                            </label>
-                            <div class="rounded-lg border border-slate-200 p-4 bg-white">
-                                <p class="text-sm font-black text-kemenkeu-navy">Submit Assignment</p>
-                                <p class="mt-1 text-xs text-slate-500">Mockup akan menampilkan rekomendasi grading AI berbasis rubrik setelah jawaban dikirim.</p>
-                                <button onclick="submitAssignment()" class="mt-3 px-4 py-2 rounded-lg bg-kemenkeu-gold text-kemenkeu-navy text-sm font-black">
-                                    Submit Jawaban <i class="fa-solid fa-paper-plane ml-1"></i>
-                                </button>
+                            <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <label class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 cursor-pointer hover:border-kemenkeu-gold">
+                                    <span class="block text-sm font-black text-kemenkeu-navy"><i class="fa-solid fa-file-arrow-up mr-1"></i> Browse dan Upload File</span>
+                                    <span class="block text-xs text-slate-500 mt-1">PDF, DOCX, PPTX, XLSX, atau gambar pendukung.</span>
+                                    <input id="assignment-file" type="file" class="hidden" onchange="showSelectedFile()">
+                                    <span id="selected-file-name" class="block mt-2 text-xs font-bold text-amber-700">Belum ada file dipilih.</span>
+                                </label>
+                                <div class="rounded-lg border border-slate-200 p-4 bg-white">
+                                    <p class="text-sm font-black text-kemenkeu-navy">Submit Assignment</p>
+                                    <p class="mt-1 text-xs text-slate-500">Mockup akan menampilkan rekomendasi grading AI berbasis rubrik setelah jawaban dikirim.</p>
+                                    <button onclick="submitAssignment()" class="mt-3 px-4 py-2 rounded-lg bg-kemenkeu-gold text-kemenkeu-navy text-sm font-black">
+                                        Submit Jawaban <i class="fa-solid fa-paper-plane ml-1"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <div id="assignment-confirmation" class="hidden rounded-lg border border-amber-200 bg-amber-50 p-4">
-                            <p class="font-black text-amber-900">Konfirmasi Pengiriman Jawaban</p>
-                            <p class="mt-1 text-sm text-amber-900">Pastikan jawaban essay dan/atau file lampiran sudah final. Setelah dikonfirmasi, mockup AI powered grading akan menampilkan feedback dan menggantikan isi tab Assignment.</p>
-                            <div class="mt-3 flex flex-wrap gap-2">
-                                <button onclick="confirmAssignmentSubmission()" class="px-4 py-2 rounded-lg bg-kemenkeu-gold text-kemenkeu-navy text-sm font-black">Konfirmasi Pengiriman</button>
-                                <button onclick="cancelAssignmentConfirmation()" class="px-4 py-2 rounded-lg bg-white border border-amber-300 text-amber-900 text-sm font-black">Periksa Kembali</button>
+                            <div id="assignment-confirmation" class="hidden mt-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                                <p class="font-black text-amber-900">Konfirmasi Pengiriman Jawaban</p>
+                                <p class="mt-1 text-sm text-amber-900">Pastikan jawaban essay dan/atau file lampiran sudah final. Setelah dikonfirmasi, mockup AI powered grading akan menampilkan feedback dan menggantikan isi tab Assignment.</p>
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    <button onclick="confirmAssignmentSubmission()" class="px-4 py-2 rounded-lg bg-kemenkeu-gold text-kemenkeu-navy text-sm font-black">Konfirmasi Pengiriman</button>
+                                    <button onclick="cancelAssignmentConfirmation()" class="px-4 py-2 rounded-lg bg-white border border-amber-300 text-amber-900 text-sm font-black">Periksa Kembali</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
-                                <thead class="bg-kemenkeu-navy text-white text-xs">
-                                    <tr>
-                                        <th class="p-3 text-left">Kriteria Rubrik</th>
-                                        <th class="p-3 text-left">Bobot</th>
-                                        <th class="p-3 text-left">Level Baik</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100">
-                                    ${rubricRows.map(row => `
+                        </section>
+                        <section id="assignment-rubric-tab" data-tab-panel="assignment-work" class="hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+                                    <thead class="bg-kemenkeu-navy text-white text-xs">
                                         <tr>
-                                            <td class="p-3 font-bold">${escapeHtml(row.criterion)}</td>
-                                            <td class="p-3 font-black text-kemenkeu-navy">${escapeHtml(row.weight)}</td>
-                                            <td class="p-3 text-slate-600">${escapeHtml(row.level)}</td>
+                                            <th class="p-3 text-left">Kriteria Rubrik</th>
+                                            <th class="p-3 text-left">Bobot</th>
+                                            <th class="p-3 text-left">Level Baik</th>
                                         </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        ${rubricRows.map(row => `
+                                            <tr>
+                                                <td class="p-3 font-bold">${escapeHtml(row.criterion)}</td>
+                                                <td class="p-3 font-black text-kemenkeu-navy">${escapeHtml(row.weight)}</td>
+                                                <td class="p-3 text-slate-600">${escapeHtml(row.level)}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        <div id="assignment-feedback" class="hidden"></div>
-                    </article>
+                        </section>
+                    </div>
                 </div>
             `;
         }
@@ -1180,65 +1705,109 @@
             };
             document.getElementById('assignment-confirmation').classList.remove('hidden');
             pushScormEvent("Interaction", "assignment-submit-clicked");
+            saveSessionState();
         }
 
         function cancelAssignmentConfirmation() {
             document.getElementById('assignment-confirmation').classList.add('hidden');
+            saveSessionState();
         }
 
-        function confirmAssignmentSubmission() {
-            const submission = pendingAssignmentSubmission || { hasAnswer: false, fileName: '', wordCount: 0 };
+        function getAssignmentFeedbackScores(submission) {
+            submission = submission || pendingAssignmentSubmission || { hasAnswer: false, fileName: '', wordCount: 0 };
             const hasAnswer = submission.hasAnswer;
             const hasFile = Boolean(submission.fileName);
-            const scores = [
+            return [
                 { score: hasAnswer ? 82 : 65, note: hasAnswer ? "Konsep ekspor-impor dan tujuan importasi sudah muncul, tetapi neraca perdagangan belum dikaitkan secara eksplisit." : "Jawaban tertulis masih minim; perlu menyebut ekspor-impor dan konteks importasi." },
                 { score: hasAnswer ? 88 : 70, note: "Alur kawasan pabean, TPS, dan pemberitahuan pabean sudah menjadi inti analisis." },
                 { score: hasAnswer ? 78 : 62, note: "Analisis risiko sudah ada, namun dapat diperkaya dengan contoh profiling, jalur hijau, atau pemeriksaan selektif." },
                 { score: hasFile ? 86 : 74, note: hasFile ? "Rujukan dan lampiran pendukung meningkatkan keterlacakan jawaban." : "Belum ada lampiran; rujukan materi perlu dibuat lebih eksplisit." }
             ];
-            const total = Math.round(scores.reduce((sum, item, index) => sum + item.score * (parseInt(rubricRows[index].weight, 10) / 100), 0));
-            assignmentScore = total;
+        }
+
+        function renderAssignmentFeedbackView() {
+            const submission = pendingAssignmentSubmission || { hasAnswer: false, fileName: '', wordCount: 0 };
+            const hasFile = Boolean(submission.fileName);
+            const scores = getAssignmentFeedbackScores(submission);
+            const total = assignmentScore ?? Math.round(scores.reduce((sum, item, index) => sum + item.score * (parseInt(rubricRows[index].weight, 10) / 100), 0));
             document.getElementById('view-assignment').innerHTML = `
                 <div class="bg-kemenkeu-navy text-white p-4 md:p-5">
                     <h2 class="text-lg md:text-2xl font-black">Feedback Assignment dan Rubrik</h2>
                     <p class="mt-1 text-sm text-slate-300 max-w-4xl">Hasil mockup AI powered grading setelah peserta mengonfirmasi pengiriman jawaban.</p>
                 </div>
-                <div class="p-4 md:p-5 space-y-4">
-                    <div class="rounded-lg border border-slate-200 overflow-hidden">
-                    <div class="bg-emerald-50 border-b border-emerald-200 p-4">
-                        <p class="text-[11px] uppercase tracking-widest font-black text-emerald-700">Mockup Feedback Assignment</p>
-                        <h3 class="mt-1 text-2xl font-black text-emerald-900">Rekomendasi Skor: ${total}</h3>
-                        <p class="mt-1 text-sm text-emerald-900">Submission dikonfirmasi${hasFile ? ` dengan lampiran ${escapeHtml(submission.fileName)}` : ' tanpa lampiran'}. Jumlah kata terdeteksi: ${submission.wordCount}. Penilaian berikut adalah simulasi rekomendasi AI dan tetap perlu review instruktur.</p>
+                <div class="p-4 md:p-5">
+                    <div class="flex flex-wrap gap-2">
+                        <button data-tab-group="assignment-feedback" data-tab-target="assignment-feedback-summary" onclick="switchPanelTab('assignment-feedback','assignment-feedback-summary')" class="px-3 py-2 rounded-lg border border-kemenkeu-navy bg-kemenkeu-navy text-white text-xs font-black">Ringkasan</button>
+                        <button data-tab-group="assignment-feedback" data-tab-target="assignment-feedback-rubric" onclick="switchPanelTab('assignment-feedback','assignment-feedback-rubric')" class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-black">Nilai Rubrik</button>
+                        <button data-tab-group="assignment-feedback" data-tab-target="assignment-feedback-general" onclick="switchPanelTab('assignment-feedback','assignment-feedback-general')" class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-black">Feedback Umum</button>
                     </div>
-                    <div class="divide-y divide-slate-100">
-                        ${rubricRows.map((row, index) => `
-                            <div class="p-4 grid grid-cols-1 md:grid-cols-5 gap-3">
-                                <div class="md:col-span-2">
-                                    <p class="font-black text-kemenkeu-navy">${escapeHtml(row.criterion)}</p>
-                                    <p class="text-xs text-slate-500">Bobot ${escapeHtml(row.weight)}</p>
-                                </div>
-                                <div class="md:col-span-1">
-                                    <span class="inline-flex px-2 py-1 rounded bg-kemenkeu-gold/20 text-kemenkeu-navy text-sm font-black">${scores[index].score}</span>
-                                </div>
-                                <p class="md:col-span-2 text-sm text-slate-600">${escapeHtml(scores[index].note)}</p>
+                    <div class="mt-4 min-h-[420px] max-h-[540px] overflow-y-auto rounded-lg border border-slate-200 bg-white p-4">
+                        <section id="assignment-feedback-summary" data-tab-panel="assignment-feedback">
+                            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                                <p class="text-[11px] uppercase tracking-widest font-black text-emerald-700">Mockup Feedback Assignment</p>
+                                <h3 class="mt-1 text-3xl font-black text-emerald-900">Rekomendasi Skor: ${total}</h3>
+                                <p class="mt-1 text-sm text-emerald-900">Submission dikonfirmasi${hasFile ? ` dengan lampiran ${escapeHtml(submission.fileName)}` : ' tanpa lampiran'}. Jumlah kata terdeteksi: ${submission.wordCount || 0}. Penilaian berikut adalah simulasi rekomendasi AI dan tetap perlu review instruktur.</p>
                             </div>
-                        `).join('')}
+                            <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div class="rounded-lg border border-slate-200 p-4 bg-slate-50">
+                                    <p class="text-[11px] font-black uppercase text-slate-500">Kelengkapan Konsep</p>
+                                    <p class="mt-2 text-xl font-black text-kemenkeu-navy">${scores[0].score}</p>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 p-4 bg-slate-50">
+                                    <p class="text-[11px] font-black uppercase text-slate-500">Alur Kepabeanan</p>
+                                    <p class="mt-2 text-xl font-black text-kemenkeu-navy">${scores[1].score}</p>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 p-4 bg-slate-50">
+                                    <p class="text-[11px] font-black uppercase text-slate-500">Rujukan/Lampiran</p>
+                                    <p class="mt-2 text-xl font-black text-kemenkeu-navy">${scores[3].score}</p>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="assignment-feedback-rubric" data-tab-panel="assignment-feedback" class="hidden">
+                            <div class="divide-y divide-slate-100 rounded-lg border border-slate-200 overflow-hidden">
+                                ${rubricRows.map((row, index) => `
+                                    <div class="p-4 grid grid-cols-1 md:grid-cols-5 gap-3">
+                                        <div class="md:col-span-2">
+                                            <p class="font-black text-kemenkeu-navy">${escapeHtml(row.criterion)}</p>
+                                            <p class="text-xs text-slate-500">Bobot ${escapeHtml(row.weight)}</p>
+                                        </div>
+                                        <div class="md:col-span-1">
+                                            <span class="inline-flex px-2 py-1 rounded bg-kemenkeu-gold/20 text-kemenkeu-navy text-sm font-black">${scores[index].score}</span>
+                                        </div>
+                                        <p class="md:col-span-2 text-sm text-slate-600">${escapeHtml(scores[index].note)}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </section>
+                        <section id="assignment-feedback-general" data-tab-panel="assignment-feedback" class="hidden">
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700">
+                                <strong>Feedback umum assignment:</strong> Jawaban sudah mengarah pada hubungan antara perdagangan internasional dan proses kepabeanan. Perbaikan utama adalah memperjelas urutan proses sejak barang masuk daerah pabean, menambahkan rujukan slide, dan memberi contoh konkret bagaimana manajemen risiko membedakan pelaku patuh dan kiriman berisiko tinggi.
+                            </div>
+                            <div class="mt-3 rounded-lg bg-sky-50 border border-sky-200 p-4 text-sm text-sky-900">
+                                <strong>Saran tindak lanjut:</strong> buka kembali halaman tentang kawasan pabean, TPS, pemberitahuan pabean, dan manajemen risiko. Gunakan istilah tersebut sebagai struktur memo agar argumen lebih runtut.
+                            </div>
+                        </section>
                     </div>
-                    <div class="bg-slate-50 p-4 text-sm text-slate-700">
-                        <strong>Feedback umum assignment:</strong> Jawaban sudah mengarah pada hubungan antara perdagangan internasional dan proses kepabeanan. Perbaikan utama adalah memperjelas urutan proses sejak barang masuk daerah pabean, menambahkan rujukan slide, dan memberi contoh konkret bagaimana manajemen risiko membedakan pelaku patuh dan kiriman berisiko tinggi.
+                    <div class="flex justify-end">
+                        <button onclick="switchView('posttest')" class="px-4 py-2 rounded-lg bg-kemenkeu-gold text-kemenkeu-navy text-sm font-black">
+                            Lanjut ke Post Test <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
                     </div>
-                </div>
-                <div class="flex justify-end">
-                    <button onclick="switchView('posttest')" class="px-4 py-2 rounded-lg bg-kemenkeu-gold text-kemenkeu-navy text-sm font-black">
-                        Lanjut ke Post Test <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </button>
-                </div>
                 </div>
             `;
+        }
+
+        function confirmAssignmentSubmission() {
+            const submission = pendingAssignmentSubmission || { hasAnswer: false, fileName: '', wordCount: 0 };
+            const scores = getAssignmentFeedbackScores(submission);
+            const total = Math.round(scores.reduce((sum, item, index) => sum + item.score * (parseInt(rubricRows[index].weight, 10) / 100), 0));
+            assignmentScore = total;
+            renderAssignmentFeedbackView();
             pushScormEvent("SetValue", `assignment_score=${total}`);
             updateNavigationLocks();
             renderAnalyticsView();
             renderFeedbackView();
+            saveSessionState();
         }
 
         function pushScormEvent(event, value) {
@@ -1272,7 +1841,7 @@
                 </div>
                 <div class="p-4 md:p-5 space-y-4">
                     <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-                        ${analyticsKpi("Completion", `${moduleCompletion}%`, `${moduleVisited}/${getSlideItems().length} slide dibuka; video ${videoCompletionPercent}%`, "fa-route")}
+                        ${analyticsKpi("Completion", `${moduleCompletion}%`, `${moduleVisited}/${getSlideItems().length} file non-video dibuka; video ${videoCompletionPercent}%`, "fa-route")}
                         ${analyticsKpi("Assignment", assignmentScore === null ? "-" : assignmentScore, assignmentScore === null ? "Belum submit" : "Rubrik AI grading tersedia", "fa-file-circle-check")}
                         ${analyticsKpi("Post Test", postScore === null ? "-" : postScore, postScore === null ? "Belum submit" : `${postWrong.length} topik perlu review`, "fa-square-poll-vertical")}
                         ${analyticsKpi("Learning Gain", gain === null ? "-" : `${gain >= 0 ? '+' : ''}${gain}`, diagnosticScore === null ? "Butuh diagnostik & post test" : "Selisih diagnostik ke post test", "fa-chart-simple")}
@@ -1327,7 +1896,7 @@
                                 <li><i class="fa-solid fa-circle text-[7px] text-teal-500 mr-2"></i>Drop-off point potensial: ${moduleCompletion < 100 ? escapeHtml(dropOff) : 'Modul selesai'}</li>
                                 <li><i class="fa-solid fa-circle text-[7px] text-teal-500 mr-2"></i>Topik yang dicari: ${searchEvents.length ? searchEvents.map(escapeHtml).join(', ') : 'Belum ada pencarian'}</li>
                                 <li><i class="fa-solid fa-circle text-[7px] text-teal-500 mr-2"></i>Rekomendasi LMS berikutnya: ${postWeakTopics.length ? `Remedial ${postWeakTopics.map(escapeHtml).join(', ')}` : 'Pengayaan studi kasus impor dan manajemen risiko'}</li>
-                                <li><i class="fa-solid fa-circle text-[7px] text-teal-500 mr-2"></i>Content coverage: ${Object.keys(completedSlides).length}/${getSlideItems().length} slide dan ${videoCompletionPercent}% video.</li>
+                                <li><i class="fa-solid fa-circle text-[7px] text-teal-500 mr-2"></i>Content coverage: ${Object.keys(completedSlides).length}/${getSlideItems().length} file non-video dan ${videoCompletionPercent}% video.</li>
                                 <li><i class="fa-solid fa-circle text-[7px] text-teal-500 mr-2"></i>Content effectiveness proxy: ${postScore === null ? 'Menunggu post test' : postScore >= 75 ? 'Efektif untuk mayoritas kompetensi' : 'Perlu penguatan materi atau contoh'}.</li>
                                 <li><i class="fa-solid fa-circle text-[7px] text-teal-500 mr-2"></i>Navigation behavior: ${searchEvents.length ? 'Non-linear eksploratif melalui pencarian' : 'Linear/sequential tanpa pencarian aktif'}.</li>
                                 <li><i class="fa-solid fa-circle text-[7px] text-teal-500 mr-2"></i>Revision priority: ${postWeakTopics.length ? postWeakTopics.map(escapeHtml).join(', ') : 'Belum ada prioritas revisi berbasis soal'}.</li>
@@ -1372,7 +1941,7 @@
                             <h3 class="font-black text-amber-900">Feedback untuk Instructional Designer</h3>
                             <ul class="mt-3 space-y-2 text-sm text-amber-950">
                                 <li>Tambahkan contoh visual untuk topik yang sering menjadi weakness pada post test.</li>
-                                <li>Jika pencarian banyak terjadi pada istilah tertentu, tambahkan glosarium atau callout definisi di slide terkait.</li>
+                                <li>Jika pencarian banyak terjadi pada istilah tertentu, tambahkan glosarium atau callout definisi pada materi terkait.</li>
                                 <li>Jika drop-off terjadi sebelum video, pertimbangkan ringkasan transisi sebelum item terakhir.</li>
                                 <li>Review distraktor soal jika banyak peserta salah pada kompetensi yang sama meski completion tinggi.</li>
                             </ul>
@@ -1417,8 +1986,8 @@
 
         function buildActivityRows(searchEvents, chatEvents, moduleCompletion) {
             return [
-                ['viewed_module_item', Object.keys(completedSlides).length, `${moduleCompletion}%`, 'Completion dihitung dari slide dan durasi video'],
-                ['watched_video_percent', `${videoCompletionPercent}%`, 'Video Pembahasan Soal.mp4', 'Menentukan unlock assignment bersama slide completion'],
+                ['viewed_module_item', Object.keys(completedSlides).length, `${moduleCompletion}%`, 'Completion dihitung dari file knowledge non-video dan durasi video'],
+                ['watched_video_percent', `${videoCompletionPercent}%`, slides.find(item => item.type === 'video')?.file?.name || '-', 'Menentukan unlock assignment bersama module completion'],
                 ['searched_content', searchEvents.length, searchEvents.join('|') || '-', 'Menunjukkan istilah yang perlu glosarium/callout'],
                 ['asked_chatbot', chatEvents, 'Srikandi AI Bot', 'Mengindikasikan kebutuhan bantuan konseptual'],
                 ['submitted_assignment', assignmentScore === null ? 0 : 1, assignmentScore ?? '-', 'Mengukur transfer konsep ke studi kasus'],
@@ -1486,7 +2055,7 @@
         function renderFeedbackView() {
             const completion = calculateModuleCompletion();
             const components = [
-                { label: "Penyelesaian modul pembelajaran", value: completion, note: `${Object.keys(completedSlides).length} slide dibuka dan ${videoCompletionPercent}% durasi video ditonton` },
+                { label: "Penyelesaian modul pembelajaran", value: completion, note: `${Object.keys(completedSlides).length} file non-video dibuka dan ${videoCompletionPercent}% durasi video ditonton` },
                 { label: "Nilai assignment", value: assignmentScore, note: assignmentScore === null ? "Belum submit assignment" : "Berdasarkan rekomendasi rubrik assignment" },
                 { label: "Nilai post test", value: postScore, note: postScore === null ? "Belum submit post test" : "Berdasarkan jawaban post test terakhir" }
             ];
@@ -1538,7 +2107,7 @@
                         <h3 class="font-black text-sky-900">Saran Meningkatkan Pemahaman</h3>
                         <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-sky-950">
                             <div class="rounded-lg bg-white/70 border border-sky-100 p-3"><strong>Ulangi konsep inti:</strong> gunakan deep search untuk meninjau ekspor-impor, neraca, keunggulan komparatif, kawasan pabean, dan manajemen risiko.</div>
-                            <div class="rounded-lg bg-white/70 border border-sky-100 p-3"><strong>Perkuat transfer kasus:</strong> bandingkan jawaban assignment dengan rubrik, lalu tambahkan rujukan slide yang eksplisit.</div>
+                            <div class="rounded-lg bg-white/70 border border-sky-100 p-3"><strong>Perkuat transfer kasus:</strong> bandingkan jawaban assignment dengan rubrik, lalu tambahkan rujukan materi yang eksplisit.</div>
                             <div class="rounded-lg bg-white/70 border border-sky-100 p-3"><strong>Gunakan feedback post test:</strong> lihat referensi materi pada jawaban salah dan susun catatan ringkas untuk tiap weakness.</div>
                         </div>
                     </section>
@@ -1557,7 +2126,7 @@
 
         function buildFeedbackWeaknesses(completion) {
             const weaknesses = [];
-            if (completion < 80) weaknesses.push("Penyelesaian modul belum optimal; beberapa slide atau video belum dibuka.");
+            if (completion < 80) weaknesses.push("Penyelesaian modul belum optimal; beberapa materi atau video belum dibuka.");
             if (assignmentScore === null) weaknesses.push("Assignment belum dikumpulkan, sehingga kemampuan aplikasi konsep pada studi kasus belum dapat dinilai.");
             else if (assignmentScore < 75) weaknesses.push("Assignment perlu diperkuat pada argumentasi, rujukan sumber, dan analisis risiko.");
             if (postScore === null) weaknesses.push("Post test belum dikerjakan, sehingga capaian akhir belum dapat dikonfirmasi.");
@@ -1577,20 +2146,23 @@
         }
 
         function init() {
-            document.getElementById('slide-selector').innerHTML = slides.map(s => `<option value="${s.id}">${s.type === 'video' ? 'Video' : 'Slide'} ${s.id}: ${escapeHtml(s.title)}</option>`).join('');
+            restoreSessionState();
+            renderSlideSelector();
             renderQuestionView('view-diagnostic', 'Diagnostik Test', 'Lima soal awal untuk memetakan pemahaman peserta sebelum masuk modul pembelajaran.', diagnosticQuestions, 'diagnostic');
             renderSlide();
+            renderResources();
             renderFAQs();
             renderAssignmentView();
             renderQuestionView('view-posttest', 'Post Test', 'Sepuluh soal akhir dengan blueprint yang selaras untuk mengukur capaian setelah pembelajaran.', postQuestions, 'posttest');
             renderFeedbackView();
             renderAnalyticsView();
             updateNavigationLocks();
-            if (isInstructorAnalyticsMode() && window.location.hash === '#analytics') {
-                switchView('analytics');
-            } else {
-                switchView('diagnostic');
-            }
+            loadMaterialManifest(false).then(() => {
+                const targetView = isInstructorAnalyticsMode() && window.location.hash === '#analytics'
+                    ? 'analytics'
+                    : (canAccessTab(restoredActiveView) ? restoredActiveView : 'diagnostic');
+                switchView(targetView);
+            });
             document.addEventListener('keydown', e => {
                 if (e.target.tagName === 'INPUT' || !document.getElementById('view-learning').classList.contains('hidden')) {
                     if (e.target.tagName === 'INPUT') return;
